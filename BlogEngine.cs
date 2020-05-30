@@ -9,43 +9,37 @@ using Microsoft.Extensions.Logging;
 
 namespace jsonBlog
 {
-    public class BlogEngine
+    public partial class BlogEngine
     {
-        private readonly IMemoryCache _postCache = new MemoryCache(new MemoryCacheOptions
-        {
-            ExpirationScanFrequency = TimeSpan.Zero
-        });
-        private readonly ILogger _logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<BlogEngine>();
+        private readonly PostLogger _logger = new PostLogger();
+        private readonly PostStorage _storage = new PostStorage();
+        private readonly PostSerializer _serializer = new PostSerializer();
+        private readonly PostCache _cache = new PostCache();
+        
 
         public string SavePost(Post post)
         {
-            _logger.LogInformation($"Saving post {post.ID}");
-            if (!Directory.Exists(post.Author.Username))
-            {
-                Directory.CreateDirectory(post.Author.Username);
-            }
-            var path = Path.Combine(post.Author.Username, post.ID + ".json");
-            var json = JsonSerializer.Serialize(post);
-            File.WriteAllText(path,json);
-            var savedPost = _postCache.Set(post.ID, post);
+            _logger.SavingPost(post);
+            var json = _serializer.SerializePost(post);
+            var path = _storage.Save(json, post);
+            var savedPost = _cache.Set(post);
 
-            _logger.LogInformation($"Saved post {savedPost.ID}" );
+            _logger.SavedPost(savedPost);
             return path;
         }
-
+        
         public Post LoadPost(User user, int id)
         {
-            _logger.LogInformation($"Loading post {id}");
-            var path = Path.Combine(user.Email, id + ".json");
+            _logger.LoadingPost(id);
+           
+            var post = _cache.GetOrCreate(id, _ => {
+                _logger.NotFoundInCache(id);
+                var json = _storage.Load(user, id);
+                return _serializer.DeserializePost(json);
+            });
 
-            var post = _postCache.GetOrCreate(id, _ => {
-                _logger.LogInformation($"Not found in cache post {id}");
-                var json = File.ReadAllText(path);
-                return JsonSerializer.Deserialize<Post>(json); });
-
-            _logger.LogInformation($"Returning post {id}");
+            _logger.ReturnPost(id);
             return post;
         }
-
     }
 }
