@@ -17,7 +17,7 @@ namespace jsonBlog
         });
         private readonly ILogger _logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<BlogEngine>();
 
-        public async Task<string> SavePostAsync(Post post)
+        public string SavePost(Post post)
         {
             _logger.LogInformation($"Saving post {post.ID}");
             if (!Directory.Exists(post.Author.Username))
@@ -25,26 +25,23 @@ namespace jsonBlog
                 Directory.CreateDirectory(post.Author.Username);
             }
             var path = Path.Combine(post.Author.Username, post.ID + ".json");
-            using (FileStream fs = File.Create(path))
-            {
-                await JsonSerializer.SerializeAsync(fs, post);
-            }
+            var json = JsonSerializer.Serialize(post);
+            File.WriteAllText(path,json);
             var savedPost = _postCache.Set(post.ID, post);
 
             _logger.LogInformation($"Saved post {savedPost.ID}" );
             return path;
         }
 
-        public async Task<Post> LoadPostAsync(User user, int id)
+        public Post LoadPost(User user, int id)
         {
             _logger.LogInformation($"Loading post {id}");
             var path = Path.Combine(user.Email, id + ".json");
 
-            var post = await _postCache.GetOrCreateAsync(id, async _ => {
+            var post = _postCache.GetOrCreate(id, _ => {
                 _logger.LogInformation($"Not found in cache post {id}");
-                using var fs = File.OpenRead(path);
-                var p = await JsonSerializer.DeserializeAsync<Post>(fs);
-                return p; });
+                var json = File.ReadAllText(path);
+                return JsonSerializer.Deserialize<Post>(json); });
 
             _logger.LogInformation($"Returning post {id}");
             return post;

@@ -6,7 +6,7 @@ namespace jsonBlog
 {
     internal class Program
     {
-        private static async Task Main(string[] args)
+        private static void Main(string[] args)
         {
             using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace));
             ILogger logger = loggerFactory.CreateLogger<Program>();
@@ -18,11 +18,11 @@ namespace jsonBlog
 
             var newPost = new Post{ ID=1, Author= me, Body="Some amazing content",Title="This is my first post"};
 
-            var result = await engine.SavePostAsync(newPost);
+            var result = engine.SavePost(newPost);
 
             logger.LogInformation(result);
 
-            var postLoaded = await engine.LoadPostAsync(me,newPost.ID);
+            var postLoaded = engine.LoadPost(me,newPost.ID);
 
             logger.LogInformation(postLoaded.ToString());
         }
