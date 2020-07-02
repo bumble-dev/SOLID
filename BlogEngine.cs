@@ -15,7 +15,6 @@ namespace jsonBlog
         private readonly PostStorage _storage = new PostStorage();
         private readonly PostSerializer _serializer = new PostSerializer();
         private readonly PostCache _cache = new PostCache();
-        
 
         public string SavePost(Post post)
         {
@@ -27,12 +26,13 @@ namespace jsonBlog
             _logger.SavedPost(savedPost);
             return path;
         }
-        
+
         public Post LoadPost(User user, int id)
         {
             _logger.LoadingPost(id);
-           
-            var post = _cache.GetOrCreate(id, _ => {
+
+            var post = _cache.GetOrCreate(id, _ =>
+            {
                 _logger.NotFoundInCache(id);
                 var json = _storage.Load(user, id);
                 return _serializer.DeserializePost(json);

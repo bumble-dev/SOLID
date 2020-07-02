@@ -7,10 +7,11 @@ namespace jsonBlog
 {
     public class PostStorage
     {
-        public string Save(string serializedPost, Post post){
+        public string Save(string serializedPost, Post post)
+        {
             EnsureAuthorDirExists(post.Author);
             var path = GetPath(post.Author, post.ID);
-            File.WriteAllText(path,serializedPost);
+            File.WriteAllText(path, serializedPost);
             return path;
         }
 
@@ -22,14 +23,12 @@ namespace jsonBlog
             }
         }
 
-        public string Load(User author, int id){
+        public string Load(User author, int id)
+        {
             var path = GetPath(author, id);
-            return File.ReadAllText(path); 
+            return File.ReadAllText(path);
         }
 
         public string GetPath(User user, int id) => Path.Combine(user.Email, id + ".json");
-
-
-
     }
 }
