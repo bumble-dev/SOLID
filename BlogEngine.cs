@@ -12,7 +12,7 @@ namespace jsonBlog
     public partial class BlogEngine
     {
         private readonly PostLogger _logger = new PostLogger();
-        private readonly PostStorage _storage = new PostStorage();
+        private readonly PostStorage _storage = new PostStorageB64Id();
         private readonly PostSerializer _serializer = new PostSerializer();
         private readonly PostCache _cache = new PostCache();
 

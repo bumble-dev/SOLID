@@ -15,11 +15,13 @@ namespace jsonBlog
             return path;
         }
 
-        private static void EnsureAuthorDirExists(User author)
+        private void EnsureAuthorDirExists(User author)
         {
-            if (!Directory.Exists(author.Username))
+            var path = GetPath(author, 0);
+            var dir = Path.GetDirectoryName(path);
+            if (!Directory.Exists(dir))
             {
-                Directory.CreateDirectory(author.Username);
+                Directory.CreateDirectory(dir);
             }
         }
 
@@ -29,6 +31,6 @@ namespace jsonBlog
             return File.ReadAllText(path);
         }
 
-        public string GetPath(User user, int id) => Path.Combine(user.Email, id + ".json");
+        public virtual string GetPath(User user, int id) => Path.Combine(user.Email, id + ".json");
     }
 }
