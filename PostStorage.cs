@@ -7,7 +7,7 @@ namespace jsonBlog
 {
     public class PostStorage
     {
-        public string Save(string serializedPost, Post post)
+        public virtual string Save(string serializedPost, Post post)
         {
             EnsureAuthorDirExists(post.Author);
             var path = GetPath(post.Author, post.ID);
@@ -25,7 +25,7 @@ namespace jsonBlog
             }
         }
 
-        public string Load(User author, int id)
+        public virtual string Load(User author, int id)
         {
             var path = GetPath(author, id);
             return File.ReadAllText(path);
