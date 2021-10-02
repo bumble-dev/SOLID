@@ -4,7 +4,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace jsonBlog
 {
-    public class PostCache
+    public interface IPostCache
+    {
+        Post GetOrCreate(int id, Func<ICacheEntry, Post> factory);
+        Post Set(Post post);
+    }
+    public class PostCache : IPostCache
     {
         private readonly IMemoryCache _postCache = new MemoryCache(new MemoryCacheOptions
         {

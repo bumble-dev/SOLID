@@ -18,11 +18,14 @@ namespace jsonBlog
 
             var newPost = new Post{ ID=1, Author= me, Body="Some amazing content",Title="This is my first post"};
 
-            var result = engine.SavePost(newPost);
+            var savedPost = engine.Save(newPost);
 
-            logger.LogInformation(result);
+            logger.LogInformation(savedPost.ToString());
 
-            var postLoaded = engine.LoadPost(me,newPost.ID);
+            var filelocator = new PostStorageFileSystem(new PostSerializer());
+            logger.LogInformation( filelocator.GetPath( savedPost.Author, savedPost.ID));
+
+            var postLoaded = engine.Load(me,newPost.ID);
 
             logger.LogInformation(postLoaded.ToString());
         }

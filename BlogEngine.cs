@@ -9,33 +9,44 @@ using Microsoft.Extensions.Logging;
 
 namespace jsonBlog
 {
-    public partial class BlogEngine
+    public interface IPostManager
+    {
+        Post Load(User user, int id);
+        Post Save(Post post);
+    }
+
+    public partial class BlogEngine : IPostManager
     {
         private readonly PostLogger _logger = new PostLogger();
-        private readonly PostStorage _storage = new PostStorageB64Id();
-        private readonly PostSerializer _serializer = new PostSerializer();
-        private readonly PostCache _cache = new PostCache();
+        private readonly IPostSerializer _serializer = new PostSerializer();
+        private readonly IPostManager _storage;
+        private readonly IPostCache _cache = new PostCache();
 
-        public string SavePost(Post post)
+        public BlogEngine()
+        {
+            _storage = new PostStorageFileSystem(_serializer);
+        }
+        public Post Save(Post post)
         {
             _logger.SavingPost(post);
-            var json = _serializer.SerializePost(post);
-            var path = _storage.Save(json, post);
+           
+            _storage.Save(post);
+            
             var savedPost = _cache.Set(post);
 
             _logger.SavedPost(savedPost);
-            return path;
+
+            return post;
         }
 
-        public Post LoadPost(User user, int id)
+        public Post Load(User user, int id)
         {
             _logger.LoadingPost(id);
 
             var post = _cache.GetOrCreate(id, _ =>
             {
                 _logger.NotFoundInCache(id);
-                var json = _storage.Load(user, id);
-                return _serializer.DeserializePost(json);
+                return _storage.Load(user, id);
             });
 
             _logger.ReturnPost(id);

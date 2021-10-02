@@ -4,33 +4,40 @@ using jsonBlog.Models;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-public class PostStorageSql : PostStorage
+
+
+
+public class PostStorageSql : IPostManager 
 {
 
     private Dictionary<int, string> database = new Dictionary<int, string>();
     private readonly string cnx;
+    private readonly PostSerializer _serializer;
 
-    public PostStorageSql(string cnx)
+    public PostStorageSql(string cnx, PostSerializer serializer)
     {
         Contract.Requires<ArgumentNullException>(string.IsNullOrWhiteSpace(cnx));
         this.cnx = cnx;
+        this._serializer = serializer;
     }
 
-    public override string Load(User author, int id)
+    public Post Load(User author, int id)
     {
         // open connexion
         var post = database[id];
         Contract.Ensures(post != null);
         Contract.Invariant(cnx != null);
-        return database[id];
+        var json = database[id];
+        return _serializer.DeserializePost(json);
     }
 
-    public override string Save(string serializedPost, Post post)
+    public Post Save( Post post)
     {
-        database.Add(post.ID, serializedPost);
-        return string.Empty;
+        var json = _serializer.SerializePost(post);
+        database.Add(post.ID, json);
+        return post;
     }
 
-    public override string GetPath(User user, int id) => throw new NotImplementedException("Should ne be call");
+    
 
 }

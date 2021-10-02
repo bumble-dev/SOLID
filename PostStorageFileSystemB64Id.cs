@@ -6,8 +6,9 @@ using jsonBlog.Models;
 
 namespace jsonBlog
 {
-    public class PostStorageB64Id : PostStorage
+    public class PostStorageFileSystemB64Id : PostStorageFileSystem
     {
+        public PostStorageFileSystemB64Id(PostSerializer serializer) : base(serializer) { }
         public override string GetPath(User user, int id)
         {
             var b = Encoding.ASCII.GetBytes(user.ID.ToString());
